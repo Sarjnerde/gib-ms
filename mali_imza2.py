@@ -11,6 +11,19 @@ def create_hash(data):
     """
     return hashlib.sha384(data.encode("utf-8")).digest()
 
+def find_signing_key(session):
+    """
+    Cihazdaki özel anahtarları tarar ve imzalama için uygun olanı otomatik olarak seçer.
+    """
+    keys = session.get_objects({Attribute.CLASS: ObjectClass.PRIVATE_KEY})
+    for key in keys:
+        print(f"Bulunan Anahtar: {key}")
+        # Etikette 'SIGN' anahtar kelimesini kontrol et
+        if 'SIGN' in key.label:
+            print(f"İmzalama Anahtarı Bulundu: {key.label}")
+            return key
+    return None
+
 def sign_with_hsm(data):
     """
     Slot bilgisi ile bağlanarak SHA384WITH RSA_PKCS algoritması ile imzalama işlemi yapar.
@@ -32,14 +45,8 @@ def sign_with_hsm(data):
         with token.open(user_pin=PIN) as session:
             print("Token ile oturum açıldı.")
 
-            # Özel Anahtarları Listele ve Filtrele
-            private_key = None
-            keys = session.get_objects({Attribute.LABEL: '8001239826SIGN0', Attribute.CLASS: ObjectClass.PRIVATE_KEY})
-            for key in keys:
-                print(f"Anahtar: {key}")
-                private_key = key  # İlk bulunan özel anahtar seçiliyor
-                break
-
+            # Otomatik Etiket Çekimi: İmzalama Anahtarını Bul
+            private_key = find_signing_key(session)
             if private_key is None:
                 raise Exception("İmzalama için uygun özel anahtar bulunamadı!")
 
