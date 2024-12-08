@@ -6,7 +6,7 @@ import requests
 app = Flask(__name__)
 
 API_URL = "https://okctest.gib.gov.tr/api/v1/okc/okcesu/yeniEsuKayit"
-API_KEY = "YOUR_API_KEY"
+API_KEY = "Abc123"
 
 # XML Oluşturma Fonksiyonu
 def create_xml(data, root_tag):
